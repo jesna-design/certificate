@@ -192,7 +192,7 @@ def _valid_email(value: object) -> str | None:
 
 
 def _home(csrf: str) -> bytes:
-    html = (APP_DIR / "static" / "index.html").read_text(encoding="utf-8")
+    html = (APP_DIR / "index.html").read_text(encoding="utf-8")
     return html.replace("__CSRF_TOKEN__", csrf).encode("utf-8")
 
 
@@ -316,20 +316,40 @@ def application(environ, start_response):
         _session_secret()
         method = environ.get("REQUEST_METHOD", "GET").upper()
         path = environ.get("PATH_INFO", "/")
+
         if method == "GET" and path == "/":
             # A page reload starts a fresh lookup session, which clears a prior participant selection.
             session = _new_session()
             body = _home(session["csrf"])
-            return _respond(start_response, "200 OK", body, "text/html; charset=utf-8", [_cookie_header(session)])
-        if method == "GET" and path == "/static/app.css":
-            body = (APP_DIR / "static" / "app.css").read_bytes()
-            return _respond(start_response, "200 OK", body, "text/css; charset=utf-8")
-        if method == "GET" and path == "/static/app.js":
-            body = (APP_DIR / "static" / "app.js").read_bytes()
-            return _respond(start_response, "200 OK", body, "text/javascript; charset=utf-8")
-        if method == "GET" and path == "/static/favicon.svg":
-            body = (APP_DIR / "static" / "favicon.svg").read_bytes()
-            return _respond(start_response, "200 OK", body, "image/svg+xml; charset=utf-8")
+            return _respond(
+                start_response,
+                "200 OK",
+                body,
+                "text/html; charset=utf-8",
+                [_cookie_header(session)],
+            )
+
+        if method == "GET" and path in ("/static/app.css", "/app.css"):
+            body = (APP_DIR / "app.css").read_bytes()
+            return _respond(
+                start_response, "200 OK", body, "text/css; charset=utf-8"
+            )
+
+        if method == "GET" and path in ("/static/app.js", "/app.js"):
+            body = (APP_DIR / "app.js").read_bytes()
+            return _respond(
+                start_response,
+                "200 OK",
+                body,
+                "text/javascript; charset=utf-8",
+            )
+
+        if method == "GET" and path in ("/static/favicon.svg", "/favicon.svg"):
+            body = (APP_DIR / "favicon.svg").read_bytes()
+            return _respond(
+                start_response, "200 OK", body, "image/svg+xml; charset=utf-8"
+            )
+
         if method == "GET" and path == "/api/health":
             try:
                 with _database() as connection:
@@ -337,25 +357,65 @@ def application(environ, start_response):
                 return _json("200 OK", {"status": "ok"}, start_response)
             except Exception as exc:
                 logging.error("Health check failed (%s)", type(exc).__name__)
-                return _json("503 Service Unavailable", {"status": "unavailable"}, start_response)
+                return _json(
+                    "503 Service Unavailable",
+                    {"status": "unavailable"},
+                    start_response,
+                )
+
         session = _decode_session(environ)
         if not session:
-            return _json("403 Forbidden", {"error": "Please reload the portal and try again."}, start_response)
+            return _json(
+                "403 Forbidden",
+                {"error": "Please reload the portal and try again."},
+                start_response,
+            )
+
         if method == "POST" and path == "/api/lookup":
             supplied_csrf = environ.get("HTTP_X_CSRF_TOKEN", "")
             if not hmac.compare_digest(session["csrf"], supplied_csrf):
-                return _json("403 Forbidden", {"error": "Please reload the portal and try again."}, start_response, [_cookie_header(_new_session())])
+                return _json(
+                    "403 Forbidden",
+                    {"error": "Please reload the portal and try again."},
+                    start_response,
+                    [_cookie_header(_new_session())],
+                )
             return _lookup(environ, start_response, session)
-        match = re.fullmatch(r"/api/certificates/([A-Za-z0-9_-]{32,64})/download", path)
+
+        match = re.fullmatch(
+            r"/api/certificates/([A-Za-z0-9_-]{32,64})/download", path
+        )
         if method == "GET" and match:
-            return _certificate(environ, start_response, session, match.group(1))
+            return _certificate(
+                environ, start_response, session, match.group(1)
+            )
+
         if method not in {"GET", "POST"}:
-            return _json("405 Method Not Allowed", {"error": "Method not allowed."}, start_response, [("Allow", "GET, POST")])
+            return _json(
+                "405 Method Not Allowed",
+                {"error": "Method not allowed."},
+                start_response,
+                [("Allow", "GET, POST")],
+            )
+
         return _json("404 Not Found", {"error": "Not found."}, start_response)
+
     except Exception as exc:
         logging.error("Unhandled portal error (%s)", type(exc).__name__)
         try:
-            return _json("500 Internal Server Error", {"error": "We could not complete your request. Please try again later."}, start_response)
+            return _json(
+                "500 Internal Server Error",
+                {
+                    "error": "We could not complete your request. Please try again later."
+                },
+                start_response,
+            )
         except Exception:
-            start_response("500 Internal Server Error", [("Content-Length", "0")])
+            start_response(
+                "500 Internal Server Error", [("Content-Length", "0")]
+            )
             return [b""]
+
+
+# Alias for Gunicorn so both 'app:app' and 'app:application' work
+app = application
