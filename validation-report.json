@@ -1,0 +1,17 @@
+{
+  "total_participants": 59,
+  "valid_participant_records": 59,
+  "duplicate_email_ids": 0,
+  "duplicate_email_rows": 0,
+  "missing_email_ids": 0,
+  "invalid_email_ids": 0,
+  "missing_names": 0,
+  "duplicate_participant_name_groups": 0,
+  "duplicate_participant_name_rows": 0,
+  "missing_certificate_1_links": 0,
+  "missing_certificate_2_links": 0,
+  "invalid_certificate_urls": 0,
+  "records_requiring_correction": 0,
+  "row_issues": [],
+  "definition": "Valid participant records have a nonblank name and a valid, unique email. Missing or invalid certificate links are reported separately and do not discard a participant row."
+}

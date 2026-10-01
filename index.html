@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="__CSRF_TOKEN__">
+  <meta name="theme-color" content="#164f58">
+  <title>Certificate Download Portal</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <main class="portal-shell">
+    <section class="portal-card" aria-labelledby="page-title">
+      <div class="accent-line" aria-hidden="true"></div>
+      <h1 id="page-title">Certificate Download Portal</h1>
+      <h2>Find your certificates</h2>
+      <p class="instruction">Enter your registered email ID. Your two certificate links will appear here.</p>
+
+      <form id="lookup-form" novalidate>
+        <label for="email">Registered email ID</label>
+        <input id="email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="Enter your registered email ID" maxlength="254" required>
+        <button class="primary-button" id="submit-button" type="submit">Access certificates</button>
+        <p id="form-message" class="form-message" role="status" aria-live="polite"></p>
+      </form>
+
+      <section id="results" class="results" aria-live="polite" hidden>
+        <div class="results-heading">
+          <h2>Your certificates</h2>
+          <p id="participant-name" class="participant-name"></p>
+        </div>
+        <p id="unavailable-message" class="unavailable-message" hidden></p>
+        <div id="certificate-list" class="certificate-list"></div>
+      </section>
+    </section>
+  </main>
+</body>
+</html>

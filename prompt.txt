@@ -1,0 +1,526 @@
+# PROJECT: Secure Online Certificate Distribution Portal
+
+## ROLE
+
+Act as a senior full-stack web developer, UI/UX designer, and document-distribution system architect.
+
+Develop a secure, simple, mobile-friendly web portal for distributing certificates to participants of the programme described in the attached programme document.
+
+The attached programme document is the authoritative source for:
+- Programme title
+- Programme type
+- Dates
+- Organising institution
+- Department
+- Other relevant programme details
+
+Do not invent programme details that are not available in the attachment.
+
+---
+
+# OBJECTIVE
+
+I want to distribute TWO certificates to each participant through a single public HTTPS web link.
+
+Each participant will have:
+1. A registered email ID
+2. A registered name
+3. TWO individual certificate links
+
+I will provide this participant information in a CSV file.
+
+The system must allow a participant to:
+
+1. Open the public HTTPS webpage.
+2. Enter their registered email ID.
+3. Submit the email ID.
+4. The system searches the participant database.
+5. If the email ID is valid, identify the corresponding participant.
+6. Retrieve the TWO certificates associated with that participant.
+7. Display the participant's registered name.
+8. Display download buttons for both certificates.
+9. Allow the participant to download both certificates individually.
+10. Prevent access to certificates belonging to other participants.
+
+---
+
+# INPUT CSV
+
+I will provide a CSV file containing participant information.
+
+The CSV will contain columns similar to:
+
+- Serial No.
+- Registered Name
+- Registered Email ID
+- Certificate 1 Link
+- Certificate 2 Link
+
+The exact column names may vary.
+
+Before building the system:
+
+1. Read the CSV.
+2. Identify the relevant columns automatically.
+3. Validate every row.
+4. Detect missing email IDs.
+5. Detect missing certificate links.
+6. Detect duplicate email IDs.
+7. Detect duplicate participant names where relevant.
+8. Detect invalid URLs.
+9. Generate a validation report.
+10. Do not silently discard any participant.
+
+If duplicate email IDs exist, flag them clearly and require appropriate handling rather than randomly selecting one record.
+
+---
+
+# USER INTERFACE
+
+Create a clean, professional certificate-download webpage suitable for an academic institution.
+
+The page should contain:
+
+## Header
+
+Display:
+
+- Institution/College name from the programme attachment
+- Department name, if available
+- Programme title
+- Appropriate institutional branding if provided
+
+## Main Section
+
+Display a clear heading such as:
+
+"Certificate Download Portal"
+
+Add a short instruction:
+
+"Enter your registered email ID to access your certificates."
+
+Provide:
+
+### Email Input
+
+Placeholder:
+
+"Enter your registered email ID"
+
+The input must:
+
+- Accept email addresses.
+- Automatically trim leading/trailing spaces.
+- Treat email matching case-insensitively.
+- Validate basic email format.
+- Not expose the participant database.
+
+### Button
+
+"Access Certificates"
+
+---
+
+# AUTHENTICATION / LOOKUP LOGIC
+
+When the participant submits the email:
+
+1. Normalize the email:
+   - Trim whitespace.
+   - Convert to lowercase for comparison.
+
+2. Search the participant database.
+
+3. If the email does not exist:
+
+Display a friendly message:
+
+"We could not find a participant record for this email ID. Please check that you have entered the same email ID used during registration."
+
+Do not reveal whether similar email addresses exist.
+
+4. If the email exists:
+
+Display:
+
+"Certificates available for: [Registered Name]"
+
+Then display the two certificates separately.
+
+---
+
+# CERTIFICATE DISPLAY
+
+For each participant, display:
+
+### Certificate 1
+
+- Certificate type/title if available
+- "View Certificate"
+- "Download Certificate"
+
+### Certificate 2
+
+- Certificate type/title if available
+- "View Certificate"
+- "Download Certificate"
+
+The two certificates must be clearly distinguishable.
+
+If the CSV contains certificate names/types, use those names.
+
+If certificate names use as:
+
+- STTP Certificate
+- Software Certificate
+
+Do not confuse the two certificates.
+
+---
+
+# DOWNLOAD FUNCTION
+
+The participant must be able to download each certificate.
+
+The system should provide clearly visible buttons:
+
+[ View Certificate ]
+
+[ Download Certificate ]
+
+for each certificate.
+
+The download should retrieve the exact certificate associated with that participant.
+
+Do not allow the user to modify the certificate URL through the interface to access another participant's certificate.
+
+---
+
+# SECURITY REQUIREMENTS
+
+This is an important requirement.
+
+Do NOT expose the complete CSV file or participant database to the browser.
+
+Do NOT place the entire participant database in JavaScript running on the client side.
+
+The participant lookup must happen securely on the server/backend.
+
+The frontend should only receive the minimum information required for the authenticated lookup.
+
+Certificate links should not expose unnecessary participant information.
+
+Implement reasonable protection against:
+
+- SQL/NoSQL injection
+- CSV injection
+- XSS
+- URL manipulation
+- Enumeration of participant records
+- Unauthorized access to other participants' certificates
+- Malicious query parameters
+
+Do not display the entire participant list anywhere on the website.
+
+---
+
+# EMAIL PRIVACY
+
+Do not display the participant's complete email address after successful lookup unless necessary.
+
+If displaying it, consider masking it, for example:
+
+a****@gmail.com
+
+The system must never display another participant's email address.
+
+---
+
+# MOBILE RESPONSIVENESS
+
+The website must work properly on:
+
+- Android phones
+- iPhones
+- Tablets
+- Laptops
+- Desktop computers
+
+The email input and download buttons should be easy to use on mobile devices.
+
+---
+
+# ERROR HANDLING
+
+Handle at least the following cases:
+
+### Case 1 — Invalid email format
+
+Display:
+
+"Please enter a valid email address."
+
+### Case 2 — Email not registered
+
+Display:
+
+"We could not find a participant record for this email ID. Please verify the email ID used during registration."
+
+### Case 3 — Certificate 1 unavailable
+
+Display an appropriate message and still provide Certificate 2 if available.
+
+### Case 4 — Certificate 2 unavailable
+
+Display an appropriate message and still provide Certificate 1 if available.
+
+### Case 5 — Both certificates unavailable
+
+Display:
+
+"Your participant record was found, but your certificates are currently unavailable. Please contact the programme coordinator."
+
+### Case 6 — Server/database error
+
+Display a generic user-friendly error.
+
+Do not expose technical error messages, database information, file paths, API keys, or server details.
+
+---
+
+# ADMIN DATA VALIDATION
+
+Before deployment, create a validation process that checks the CSV.
+
+Produce a report containing:
+
+- Total participants
+- Valid participant records
+- Duplicate email IDs
+- Missing email IDs
+- Missing names
+- Missing Certificate 1 links
+- Missing Certificate 2 links
+- Invalid certificate URLs
+- Records requiring correction
+
+The system should not silently skip problematic records.
+
+---
+
+# IMPORTANT DATA-MAPPING REQUIREMENT
+
+The mapping must remain:
+
+REGISTERED EMAIL
+        ↓
+PARTICIPANT RECORD
+        ↓
+REGISTERED NAME
+        ↓
+CERTIFICATE 1
+        +
+CERTIFICATE 2
+
+The system must never accidentally mix certificates between participants.
+
+For example:
+
+Participant A's email must ONLY return Participant A's two certificates.
+
+Participant B's email must ONLY return Participant B's two certificates.
+
+---
+
+# UI DESIGN
+
+Use a professional academic/institutional design.
+
+Recommended structure:
+
+------------------------------------------------
+              COLLEGE / INSTITUTION
+              DEPARTMENT
+
+        CERTIFICATE DOWNLOAD PORTAL
+
+Enter your registered email ID
+
+[____________________________]
+
+        [ ACCESS CERTIFICATES ]
+
+------------------------------------------------
+
+After successful lookup:
+
+Certificate available for:
+
+[Participant Name]
+
+[ Certificate 1 ]
+[ View Certificate ] [ Download ]
+
+[ Certificate 2 ]
+[ View Certificate ] [ Download ]
+
+------------------------------------------------
+
+Footer:
+Programme title
+Programme dates
+Department / Institution
+------------------------------------------------
+
+Keep the design clean and uncluttered.
+
+Use accessible fonts, adequate contrast, large buttons, and responsive spacing.
+
+---
+
+# PROGRAMME INFORMATION
+
+Read the attached programme document and use its information for the webpage.
+
+Extract, where available:
+
+- Programme title
+- Programme dates
+- Institution
+- Department
+- Programme type
+- Venue/mode
+- Relevant organiser information
+
+Do not fabricate information.
+
+---
+
+# DEPLOYMENT
+
+The final system must be designed so that I can publish it using a public HTTPS URL.
+
+The final deployment URL will be distributed to all participants.
+
+Participants will receive the same URL.
+
+Example:
+
+https://certificate.example.com/
+
+Everyone should use the same webpage.
+
+The participant-specific certificate access must be determined only after they enter their registered email ID.
+
+---
+
+# IMPORTANT: DO NOT REQUIRE INDIVIDUAL LINKS TO BE SENT TO PARTICIPANTS
+
+I will distribute ONLY the common HTTPS portal link.
+
+Participants should not need to receive their individual certificate URLs by email.
+
+The workflow must therefore be:
+
+COMMON HTTPS LINK
+        ↓
+ENTER REGISTERED EMAIL
+        ↓
+VERIFY PARTICIPANT
+        ↓
+DISPLAY TWO CERTIFICATES
+        ↓
+VIEW / DOWNLOAD
+
+---
+
+# ADMINISTRATOR WORKFLOW
+
+Provide clear instructions for me as administrator:
+
+1. Prepare the CSV.
+2. Upload/import the CSV into the system.
+3. Validate the participant data.
+4. Fix any validation errors.
+5. Publish/deploy the application.
+6. Obtain the public HTTPS URL.
+7. Share the URL with all participants.
+
+If possible, provide an administrator-only data import mechanism rather than exposing the CSV publicly.
+
+---
+
+# TESTING
+
+Before declaring the system complete, test at least:
+
+1. A valid participant email.
+2. An invalid/unregistered email.
+3. An email with uppercase characters.
+4. An email with leading/trailing spaces.
+5. A participant with two valid certificates.
+6. A participant with one missing certificate.
+7. Duplicate email IDs in the CSV.
+8. Invalid certificate URLs.
+9. Mobile screen.
+10. Desktop screen.
+11. Attempt to manipulate certificate URLs.
+12. Attempt to access another participant's certificate.
+
+Verify that each valid participant receives exactly their own two certificates.
+
+---
+
+# FINAL ACCEPTANCE CRITERIA
+
+The project is complete only when:
+
+✓ The programme information is correctly extracted from the attachment.
+
+✓ The CSV participant data is correctly imported.
+
+✓ Every valid participant is mapped to their correct two certificates.
+
+✓ Participants can enter their registered email ID.
+
+✓ Email matching is case-insensitive.
+
+✓ Valid participants can see their two certificates.
+
+✓ Both certificates have download options.
+
+✓ Invalid emails cannot access certificates.
+
+✓ Participant data is not publicly exposed.
+
+✓ One participant cannot access another participant's certificates through normal URL manipulation.
+
+✓ The interface works on mobile and desktop.
+
+✓ The public website uses HTTPS.
+
+✓ The system provides clear error messages.
+
+✓ The complete participant database is not embedded in frontend JavaScript.
+
+✓ The system has been tested with representative valid and invalid records.
+
+---
+
+# FINAL DELIVERABLES
+
+Provide:
+
+1. Complete working web application.
+2. Frontend interface.
+3. Backend/database lookup mechanism.
+4. CSV import/data validation mechanism.
+5. Secure certificate access mechanism.
+6. Mobile-responsive design.
+7. Deployment instructions.
+8. Administrator instructions.
+9. Test results.
+10. Any required configuration/environment variables.
+
+Do not merely provide a conceptual design. Build the complete functional solution wherever the available environment permits.
