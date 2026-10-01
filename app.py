@@ -329,13 +329,12 @@ def application(environ, start_response):
                 [_cookie_header(session)],
             )
 
-        if method == "GET" and path in ("/static/app.css", "/app.css"):
+        if method == "GET" and path == "/static/app.css":
             body = (APP_DIR / "app.css").read_bytes()
             return _respond(
                 start_response, "200 OK", body, "text/css; charset=utf-8"
             )
-
-        if method == "GET" and path in ("/static/app.js", "/app.js"):
+        if method == "GET" and path == "/static/app.js":
             body = (APP_DIR / "app.js").read_bytes()
             return _respond(
                 start_response,
@@ -343,8 +342,7 @@ def application(environ, start_response):
                 body,
                 "text/javascript; charset=utf-8",
             )
-
-        if method == "GET" and path in ("/static/favicon.svg", "/favicon.svg"):
+        if method == "GET" and path == "/static/favicon.svg":
             body = (APP_DIR / "favicon.svg").read_bytes()
             return _respond(
                 start_response, "200 OK", body, "image/svg+xml; charset=utf-8"
