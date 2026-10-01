@@ -227,12 +227,17 @@ def _lookup(environ: dict, start_response, session: dict):
     try:
         with _database() as connection:
             records = connection.execute(
-                "SELECT * FROM participants WHERE email_norm = ? LIMIT 2", (normalized,)
+                "SELECT * FROM participants WHERE LOWER(TRIM(email_norm)) = ? OR LOWER(TRIM(email)) = ? LIMIT 2",
+                (normalized, normalized),
             ).fetchall()
     except Exception as exc:
         logging.error("Participant lookup failed (%s)", type(exc).__name__)
-        return _json("500 Internal Server Error", {"error": "We could not complete your request. Please try again later."}, start_response, set_cookie)
-
+        return _json(
+            "500 Internal Server Error",
+            {"error": "We could not complete your request. Please try again later."},
+            start_response,
+            set_cookie,
+        )
     if not live_sheet_available and not records:
         return _json("503 Service Unavailable", {"error": "We could not verify this email right now. Please try again later."}, start_response, set_cookie)
 
